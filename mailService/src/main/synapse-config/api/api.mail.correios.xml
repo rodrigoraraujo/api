@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/correio" name="api.mail.correios" xmlns="http://ws.apache.org/ns/synapse">
+    <resource methods="GET" uri-template="/{cep}">
+        <inSequence>
+            <log category="WARN" level="custom">
+                <property name="teste" value="Teste INPUT"/>
+            </log>
+            <payloadFactory media-type="xml">
+                <format>
+                    <soapenv:Envelope xmlns:cli="http://cliente.bean.master.sigep.bsb.correios.com.br/" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                        <soapenv:Header/>
+                        <soapenv:Body>
+                            <cli:consultaCEP>
+                                <cep xmlns="">$1</cep>
+                            </cli:consultaCEP>
+                        </soapenv:Body>
+                    </soapenv:Envelope>
+                </format>
+                <args>
+                    <arg evaluator="xml" expression="get-property('uri.var.cep')"/>
+                </args>
+            </payloadFactory>
+            <log level="custom">
+                <property expression="get-property('uri.var.cep')" name="cep"/>
+            </log>
+            <property action="remove" description="" name="REST_URL_POSTFIX" scope="axis2"/>
+            <log category="WARN" level="full"/>
+            <send>
+                <endpoint>
+                    <address format="soap11" uri="https://apps.correios.com.br/SigepMasterJPA/AtendeClienteService/AtendeCliente"/>
+                </endpoint>
+            </send>
+        </inSequence>
+        <outSequence>
+            <log category="WARN" level="full"/>
+            <log category="WARN" level="custom">
+                <property name="teste" value="Teste OUTPUT"/>
+            </log>
+            <send/>
+        </outSequence>
+        <faultSequence/>
+    </resource>
+</api>
